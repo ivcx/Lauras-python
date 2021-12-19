@@ -1,4 +1,4 @@
-N = float(input("Ievadiet skaitli: "))
+ = float(input("Ievadiet skaitli: "))
 if N>0:
     a=1
     b=1

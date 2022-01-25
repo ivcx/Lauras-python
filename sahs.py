@@ -1,5 +1,7 @@
 import tkinter 
 from tkinter import ttk
+import math
+import time
 #=============================================================================================================================#
 def notirit():
     kanva.delete("figura")
@@ -8,18 +10,69 @@ def nosauksana(kaulina_nosaukums):
     global figura 
     figura = kaulina_nosaukums
 
-
 def get_coordinates(laucina_nosaukums):
 # kā globālos mainīgos nosaka lauciņa rindu un kollonu
     try:
         global rinda
         global kollona
-        aa=kanva.coords(laucina_nosaukums)                      
-        kollona = aa[2]/60
-        rinda = aa[3]/60
-        match figura:
+        aa=kanva.coords(laucina_nosaukums)                     
+        kollona = math.floor(aa[2]/60)
+        rinda = math.floor(aa[3]/60)
+        if laucina_nosaukums[0:4] != "move" and laucina_nosaukums !="figura":
+            match figura:
+                case "bandinieks":
+                    izveidot_bandinieku()
+                case "tornis":
+                    izveidot_torni()
+                case "laidnis":
+                    izveidot_laidni()            
+                case "dama":
+                    izveidot_damu() 
+                case "karalis":
+                    izveidot_karali()
+                case "zirgs":
+                    izveidot_zirgu()
+    except:
+        print("Izvēlaties figūru")
+
+def sign(a):
+    if a>0:
+        return +1
+    elif a<0:
+        return -1
+
+
+
+def kustiba(apla_nosaukums):
+    get_coordinates(apla_nosaukums)
+    kanva.delete("green")
+    starpiba_x = kollona-x_figura
+    starpiba_y = sign(rinda - y_figura)
+    for i in range((rinda)*20,(y_figura)*20):
+        kanva.move("figura", 0, 3*starpiba_y)
+        time.sleep(0.001)
+        logs.update()
+        
+          
+def green_bind(apla_nosaukums):
+    kanva.tag_bind(apla_nosaukums,"<Button-1>",lambda event: kustiba(apla_nosaukums))
+
+def kustiba_paradisana(figuras_nosaukums):
+    global x_figura
+    global y_figura
+    aa=kanva.coords(figuras_nosaukums)
+    x_figura = math.ceil(aa[2]/60)
+    y_figura = math.ceil(aa[3]/60)
+    match figuras_nosaukums:
             case "bandinieks":
-                izveidot_bandinieku()
+                get_coordinates("figura")
+                if rinda == 6:
+                    atlautais = 2
+                else:
+                    atlautais = 1
+                for i in range(1,atlautais+1):
+                    kanva.create_rectangle(60*(x_figura-1),60*(y_figura-1)-(i*60),60*(x_figura),60*(y_figura)-(i*60), fill="lightgreen", tag="move"+str(i)+" green" )
+                    green_bind("move"+str(i))
             case "tornis":
                 izveidot_torni()
             case "laidnis":
@@ -30,15 +83,15 @@ def get_coordinates(laucina_nosaukums):
                 izveidot_karali()
             case "zirgs":
                 izveidot_zirgu()
-    except:
-        print("Izvēlaties figūru")
-    
+
+def figuras_bind(figuras_nosaukums):
+    kanva.tag_bind(figuras_nosaukums,"<Button-1>",lambda event: kustiba_paradisana(figuras_nosaukums))    
 
 #=============================================================================================================================#
 #figūru zīmēšana
 def izveidot_bandinieku():
-    try:
-        kanva.delete("selected")
+        kanva.delete("figura")
+        kanva.delete("green")
         kanva.create_polygon(60*(kollona-1)+25,60*(rinda-1)+20,60*(kollona-1)+18,60*(rinda-1)+45,60*(kollona-1)+25,60*(rinda-1)+45, fill=krasa ,outline=krasa, tag="figura bandinieks")
         kanva.create_polygon(60*(kollona-1)+35,60*(rinda-1)+20,60*(kollona-1)+42,60*(rinda-1)+45,60*(kollona-1)+35,60*(rinda-1)+45, fill=krasa ,outline=krasa, tag="figura bandinieks") 
         kanva.create_rectangle(60*(kollona-1)+25,60*(rinda-1)+20,60*(kollona-1)+35,60*(rinda-1)+45, fill=krasa, outline=krasa, tag="figura bandinieks")
@@ -47,12 +100,12 @@ def izveidot_bandinieku():
         kanva.create_line(60*(kollona-1)+25,60*(rinda-1)+20,60*(kollona-1)+18,60*(rinda-1)+45,tag="figura bandinieks")
         kanva.create_line(60*(kollona-1)+35,60*(rinda-1)+20,60*(kollona-1)+42,60*(rinda-1)+45,tag="figura bandinieks")
         kanva.create_oval(60*(kollona-1)+20,60*(rinda-1)+5,(60*kollona)-20,(60*rinda)-35, fill=krasa,tag="figura bandinieks")
-    except:
-        print("Vispirms izvēlaties lauciņu")
+        figuras_bind("bandinieks")
+
+
 
 def izveidot_torni():
-    try:
-        kanva.delete("selected")
+        kanva.delete("figura")
         kanva.create_rectangle(60*(kollona-1)+5,60*(rinda-1)+50,(60*kollona)-5,(60*rinda)-5 , fill=krasa,tag="figura tornis")
         kanva.create_rectangle(60*(kollona-1)+10,60*(rinda-1)+45,(60*kollona)-10,(60*rinda)-10, fill=krasa, tag="figura tornis")
         kanva.create_rectangle(60*(kollona-1)+18,60*(rinda-1)+20,60*(kollona)-18,60*(rinda)-15, fill=krasa,tag="figura tornis")
@@ -60,11 +113,10 @@ def izveidot_torni():
         kanva.create_rectangle(60*(kollona-1)+10,60*(rinda-1)+5,60*(kollona-1)+20,60*(rinda-1)+15, fill=krasa,tag="figura tornis")
         kanva.create_rectangle(60*(kollona-1)+40,60*(rinda-1)+5,60*(kollona-1)+50,60*(rinda-1)+15, fill=krasa,tag="figura tornis")
         kanva.create_rectangle(60*(kollona-1)+25,60*(rinda-1)+5,60*(kollona-1)+35,60*(rinda-1)+15, fill=krasa,tag="figura tornis")
-    except:
-        print("Vispirms izvēlaties lauciņu")
+
 
 def izveidot_laidni():
-    try:
+        kanva.delete("figura")
         kanva.create_arc(60*(kollona-1)+15,60*(rinda-1)+10, (60*kollona)-10, (60*rinda)-15, start=90, extent=180, fill=krasa, tag="figura laidnis")
         kanva.create_arc(60*(kollona-1)+10,60*(rinda-1)+10, (60*kollona)-15, (60*rinda)-15, start=270, extent=180, fill=krasa, tag="figura laidnis" , outline=krasa)
         kanva.create_arc(60*(kollona-1)+10,60*(rinda-1)+10, (60*kollona)-15, (60*rinda)-15, start=270, extent=180, tag="figura laidnis", style="arc")
@@ -72,11 +124,10 @@ def izveidot_laidni():
         kanva.create_oval(60*(kollona-1)+26,60*(rinda-1)+5, (60*kollona)-26, (60*rinda)-47,fill=krasa, tag="figura laidnis")
         kanva.create_rectangle(60*(kollona-1)+29,60*(rinda-1)+23, (60*kollona)-29, (60*rinda)-23, fill=preteja_krasa, tag="figura laidnis")
         kanva.create_rectangle(60*(kollona-1)+25,60*(rinda-1)+29, (60*kollona)-25, (60*rinda)-29, fill=preteja_krasa, tag="figura laidnis")
-    except:
-        print("Vispirms izvēlaties lauciņu")
+
 
 def izveidot_damu():
-    try:
+        kanva.delete("figura")
         kanva.create_rectangle(60*(kollona-1)+5,60*(rinda-1)+50, (60*kollona)-5, (60*rinda)-5, fill=krasa, tag="figura dama")
         kanva.create_polygon((60*(kollona-1)+10,60*(rinda-1)+50,
                             (60*kollona)-10, (60*rinda)-10,
@@ -89,11 +140,10 @@ def izveidot_damu():
         kanva.create_oval(60*(kollona-1)+25, 60*(rinda-1)+5,60*(kollona-1)+35, 60*(rinda-1)+15, fill=krasa, tag="figura dama")
         kanva.create_oval(60*(kollona-1)+50, 60*(rinda-1)+15,60*(kollona-1)+59, 60*(rinda-1)+25, fill=krasa, tag="figura dama")
         kanva.create_oval(60*(kollona-1)+1, 60*(rinda-1)+15,60*(kollona-1)+10, 60*(rinda-1)+25, fill=krasa, tag="figura dama")
-    except:
-        print("Vispirms izvēlaties lauciņu")
+
 
 def izveidot_karali():
-    try:
+        kanva.delete("figura")
         kanva.create_oval(60*(kollona-1)+25,60*(rinda-1)+10,(60*kollona)-25,(60*rinda)-20,fill=krasa, tag="figura karalis")
         kanva.create_arc(60*(kollona-1)+30,60*(rinda-1)+20,(60*kollona),(60*rinda), style="chord", start=50, extent=130, fill=krasa, tag="figura karalis" , outline=krasa) 
         kanva.create_arc(60*(kollona-1),60*(rinda-1),(60*kollona)-6,(60*rinda)-8, style="chord", start=240, extent=120, fill=krasa, tag="figura karalis", outline=krasa ) 
@@ -105,11 +155,10 @@ def izveidot_karali():
         kanva.create_arc(60*(kollona-1)+5,60*(rinda-1),(60*kollona)-6,(60*rinda)-8, style="arc", start=180, extent=120,  tag="figura karalis") 
         kanva.create_rectangle(60*(kollona-1)+15,60*(rinda-1)+50, (60*kollona)-15, (60*rinda)-5, fill=krasa, tag="figura karalis")
         kanva.create_rectangle(60*(kollona-1)+10,60*(rinda-1)+40, (60*kollona)-10, (60*rinda)-10, fill=krasa, tag="figura karalis") 
-    except:
-        print("Vispirms izvēlaties lauciņu")
+
 
 def izveidot_zirgu():
-    try:
+        kanva.delete("figura")
         kanva.create_arc(60*(kollona-1)+15,60*(rinda-1)+5, (60*kollona)-5, (60*rinda)+35,style="pieslice", fill=krasa, tag="figura zirgs", outline=krasa)
         kanva.create_arc(60*(kollona-1)+15,60*(rinda-1)+5, (60*kollona)-5, (60*rinda)+35,style="arc", tag="figura zirgs")
         kanva.create_arc(60*(kollona-1)+20,60*(rinda-1)+25, (60*kollona)-5, (60*rinda)+15,style="pieslice", start=90, extent=90, fill=krasa, tag="figura zirgs", outline=krasa)
@@ -124,11 +173,10 @@ def izveidot_zirgu():
                         fill=krasa, outline=krasa ,tag="figura zirgs"
         )
         kanva.create_arc(60*(kollona-1)+5,60*(rinda-1)+23,60*(kollona-1)+15,60*(rinda-1)+35,style="pieslice", fill=krasa, tag="figura zirgs", outline=krasa)
-
+        kanva.create_line(60*(kollona-1)+10,60*(rinda-1)+30,60*(kollona-1)+10,60*(rinda-1)+22,tag="figura zirgs")
+        kanva.create_line(60*(kollona-1)+10,60*(rinda-1)+30,60*(kollona-1)+40,60*(rinda-1)+25,tag="figura zirgs")
         kanva.create_rectangle(60*(kollona-1)+15,60*(rinda-1)+50, (60*kollona)-5, (60*rinda)-5, fill=krasa, tag="figura zirgs")
-        
-    except:
-        print("Vispirms izvēlaties lauciņu")
+
 
 #=============================================================================================================================#
 logs = tkinter.Tk()
